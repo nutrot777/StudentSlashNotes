@@ -1,21 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { MoreHorizontal } from "lucide-react";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Note, Block } from "@shared/schema";
@@ -46,12 +32,7 @@ export default function Editor({ noteId }: EditorProps) {
   const [currentNoteId, setCurrentNoteId] = useState<number | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+
 
   const { data: note, isLoading } = useQuery<Note>({
     queryKey: ["/api/notes", noteId],
@@ -159,18 +140,7 @@ export default function Editor({ noteId }: EditorProps) {
     setBlocks(prev => prev.filter(block => block.id !== blockId));
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
 
-    if (active.id !== over?.id) {
-      setBlocks((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over?.id);
-
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  };
 
   const handleKeyDown = (e: KeyboardEvent, blockId: string) => {
     const currentBlock = blocks.find(b => b.id === blockId);

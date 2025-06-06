@@ -27,11 +27,19 @@ export default function SortableBlock({ block, children }: SortableBlockProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`sortable-block ${isDragging ? 'dragging' : ''}`}
-      {...attributes}
-      {...listeners}
+      className={`relative group ${isDragging ? 'z-50' : ''}`}
     >
-      {children}
+      <div
+        className="absolute left-0 top-0 bottom-0 w-6 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing"
+        {...attributes}
+        {...listeners}
+      >
+        <div className="w-1 h-4 bg-gray-400 rounded-full"></div>
+        <div className="w-1 h-4 bg-gray-400 rounded-full ml-1"></div>
+      </div>
+      <div className="pl-8">
+        {children}
+      </div>
     </div>
   );
 }
