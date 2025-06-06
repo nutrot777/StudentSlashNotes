@@ -1,5 +1,6 @@
 import { GripVertical, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import type { Block } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
@@ -47,20 +48,17 @@ export default function CodeBlock({ block, onUpdate, onKeyDown }: CodeBlockProps
             <Copy className="w-3 h-3" />
           </Button>
         </div>
-        <pre
+        <Textarea
           data-block-id={block.id}
-          className="text-gray-300 content-editable outline-none whitespace-pre-wrap"
-          contentEditable
-          suppressContentEditableWarning
-          onInput={(e) => {
-            const content = (e.target as HTMLElement).textContent || "";
-            onUpdate(block.id, { content });
+          value={block.content}
+          onChange={(e) => {
+            onUpdate(block.id, { content: e.target.value });
           }}
           onKeyDown={(e) => onKeyDown(e.nativeEvent, block.id)}
           placeholder="Enter your code..."
-        >
-          {block.content}
-        </pre>
+          className="text-gray-300 bg-transparent border-none shadow-none p-0 focus-visible:ring-0 resize-none whitespace-pre font-mono"
+          rows={3}
+        />
       </div>
     </div>
   );

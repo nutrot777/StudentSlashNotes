@@ -1,5 +1,6 @@
 import { GripVertical } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import type { Block } from "@shared/schema";
 
 interface CheckboxBlockProps {
@@ -30,22 +31,18 @@ export default function CheckboxBlock({ block, onUpdate, onKeyDown }: CheckboxBl
           checked={isChecked}
           onCheckedChange={toggleChecked}
         />
-        <span
+        <Input
           data-block-id={block.id}
-          className={`content-editable outline-none flex-1 ${
-            isChecked ? 'line-through text-muted-foreground' : ''
-          }`}
-          contentEditable
-          suppressContentEditableWarning
-          onInput={(e) => {
-            const content = (e.target as HTMLElement).textContent || "";
-            onUpdate(block.id, { content });
+          value={block.content}
+          onChange={(e) => {
+            onUpdate(block.id, { content: e.target.value });
           }}
           onKeyDown={(e) => onKeyDown(e.nativeEvent, block.id)}
           placeholder="Todo item..."
-        >
-          {block.content}
-        </span>
+          className={`border-none shadow-none p-0 h-auto focus-visible:ring-0 ${
+            isChecked ? 'line-through text-muted-foreground' : ''
+          }`}
+        />
       </div>
     </div>
   );

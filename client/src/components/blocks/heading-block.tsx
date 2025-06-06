@@ -1,5 +1,5 @@
-import { useRef, useEffect } from "react";
 import { GripVertical } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { Block } from "@shared/schema";
 
@@ -10,8 +10,6 @@ interface HeadingBlockProps {
 }
 
 export default function HeadingBlock({ block, onUpdate, onKeyDown }: HeadingBlockProps) {
-  const elementRef = useRef<HTMLHeadingElement>(null);
-
   const getHeadingClass = () => {
     switch (block.type) {
       case 'heading-1':
@@ -25,12 +23,6 @@ export default function HeadingBlock({ block, onUpdate, onKeyDown }: HeadingBloc
     }
   };
 
-  useEffect(() => {
-    if (elementRef.current && elementRef.current.textContent !== block.content) {
-      elementRef.current.textContent = block.content;
-    }
-  }, [block.content]);
-
   return (
     <div className="group relative block-hover" data-block-type={block.type}>
       <div className="absolute -left-6 top-1 drag-handle">
@@ -38,21 +30,18 @@ export default function HeadingBlock({ block, onUpdate, onKeyDown }: HeadingBloc
           <GripVertical className="w-3 h-3" />
         </button>
       </div>
-      <h1
-        ref={elementRef}
+      <Input
         data-block-id={block.id}
-        className={cn(
-          getHeadingClass(),
-          "text-secondary-foreground mb-2 content-editable outline-none"
-        )}
-        contentEditable
-        suppressContentEditableWarning
-        onInput={(e) => {
-          const content = (e.target as HTMLElement).textContent || "";
-          onUpdate(block.id, { content });
+        value={block.content}
+        onChange={(e) => {
+          onUpdate(block.id, { content: e.target.value });
         }}
         onKeyDown={(e) => onKeyDown(e.nativeEvent, block.id)}
-        data-placeholder={block.content === "" ? `Heading ${block.type.split('-')[1]}` : ""}
+        placeholder={`Heading ${block.type.split('-')[1]}`}
+        className={cn(
+          getHeadingClass(),
+          "text-secondary-foreground mb-2 border-none shadow-none p-0 h-auto focus-visible:ring-0"
+        )}
       />
     </div>
   );

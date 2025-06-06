@@ -1,4 +1,5 @@
 import { GripVertical } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import type { Block } from "@shared/schema";
 
 interface ListBlockProps {
@@ -8,13 +9,6 @@ interface ListBlockProps {
 }
 
 export default function ListBlock({ block, onUpdate, onKeyDown }: ListBlockProps) {
-  const items = block.content.split('\n').filter(item => item.trim());
-
-  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-    const content = (e.target as HTMLElement).textContent || "";
-    onUpdate(block.id, { content });
-  };
-
   const isNumbered = block.type === 'numbered-list';
 
   return (
@@ -24,41 +18,22 @@ export default function ListBlock({ block, onUpdate, onKeyDown }: ListBlockProps
           <GripVertical className="w-3 h-3" />
         </button>
       </div>
-      <div className="pl-4">
+      <div className="flex items-start gap-2">
         {isNumbered ? (
-          <ol className="space-y-2 list-decimal">
-            <li>
-              <div
-                data-block-id={block.id}
-                className="content-editable outline-none"
-                contentEditable
-                suppressContentEditableWarning
-                onInput={handleInput}
-                onKeyDown={(e) => onKeyDown(e.nativeEvent, block.id)}
-                placeholder="List item..."
-              >
-                {block.content}
-              </div>
-            </li>
-          </ol>
+          <span className="text-muted-foreground mt-2 text-sm">1.</span>
         ) : (
-          <ul className="space-y-2">
-            <li className="flex items-start gap-2">
-              <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full mt-2 flex-shrink-0" />
-              <div
-                data-block-id={block.id}
-                className="content-editable outline-none flex-1"
-                contentEditable
-                suppressContentEditableWarning
-                onInput={handleInput}
-                onKeyDown={(e) => onKeyDown(e.nativeEvent, block.id)}
-                placeholder="List item..."
-              >
-                {block.content}
-              </div>
-            </li>
-          </ul>
+          <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full mt-3 flex-shrink-0" />
         )}
+        <Input
+          data-block-id={block.id}
+          value={block.content}
+          onChange={(e) => {
+            onUpdate(block.id, { content: e.target.value });
+          }}
+          onKeyDown={(e) => onKeyDown(e.nativeEvent, block.id)}
+          placeholder="List item..."
+          className="border-none shadow-none p-0 h-auto focus-visible:ring-0"
+        />
       </div>
     </div>
   );

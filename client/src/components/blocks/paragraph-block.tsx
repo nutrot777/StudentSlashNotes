@@ -1,5 +1,5 @@
-import { useRef, useEffect } from "react";
 import { GripVertical } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import type { Block } from "@shared/schema";
 
 interface ParagraphBlockProps {
@@ -9,14 +9,6 @@ interface ParagraphBlockProps {
 }
 
 export default function ParagraphBlock({ block, onUpdate, onKeyDown }: ParagraphBlockProps) {
-  const elementRef = useRef<HTMLParagraphElement>(null);
-
-  useEffect(() => {
-    if (elementRef.current && elementRef.current.textContent !== block.content) {
-      elementRef.current.textContent = block.content;
-    }
-  }, [block.content]);
-
   return (
     <div className="group relative block-hover" data-block-type="paragraph">
       <div className="absolute -left-6 top-1 drag-handle">
@@ -24,18 +16,16 @@ export default function ParagraphBlock({ block, onUpdate, onKeyDown }: Paragraph
           <GripVertical className="w-3 h-3" />
         </button>
       </div>
-      <p
-        ref={elementRef}
+      <Textarea
         data-block-id={block.id}
-        className="text-base leading-relaxed content-editable outline-none min-h-[24px]"
-        contentEditable
-        suppressContentEditableWarning
-        onInput={(e) => {
-          const content = (e.target as HTMLElement).textContent || "";
-          onUpdate(block.id, { content });
+        value={block.content}
+        onChange={(e) => {
+          onUpdate(block.id, { content: e.target.value });
         }}
         onKeyDown={(e) => onKeyDown(e.nativeEvent, block.id)}
-        data-placeholder={block.content === "" ? "Type something..." : ""}
+        placeholder="Type something..."
+        className="min-h-[40px] resize-none border-none shadow-none p-0 focus-visible:ring-0 text-base leading-relaxed"
+        rows={1}
       />
     </div>
   );
