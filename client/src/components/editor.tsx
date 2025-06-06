@@ -30,6 +30,11 @@ export default function Editor({ noteId }: EditorProps) {
 
   const { data: note, isLoading } = useQuery<Note>({
     queryKey: ["/api/notes", noteId],
+    queryFn: async () => {
+      const response = await fetch(`/api/notes/${noteId}`);
+      if (!response.ok) throw new Error("Failed to fetch note");
+      return response.json();
+    },
     enabled: !!noteId,
   });
 
