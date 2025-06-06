@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { MoreHorizontal, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
+import { MoreHorizontal, GripVertical, ChevronUp, ChevronDown, Download } from "lucide-react";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -110,6 +112,108 @@ export default function Editor({ noteId }: EditorProps) {
     setBlocks(prev => prev.map(block => 
       block.id === blockId ? { ...block, ...updates } : block
     ));
+  };
+
+  // PDF download functionality
+  const downloadAsPDF = async () => {
+    if (!note || !title) return;
+    
+    try {
+      // Create a temporary container with the note content
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '0';
+      tempDiv.style.width = '800px';
+      tempDiv.style.padding = '40px';
+      tempDiv.style.backgroundColor = 'white';
+      tempDiv.style.fontFamily = 'Arial, sans-serif';
+      tempDiv.style.fontSize = '14px';
+      tempDiv.style.lineHeight = '1.6';
+      
+      // Add title
+      const titleElement = document.createElement('h1');
+      titleElement.textContent = title;
+      titleElement.style.fontSize = '24px';
+      titleElement.style.marginBottom = '20px';
+      titleElement.style.color = '#000';
+      tempDiv.appendChild(titleElement);
+      
+      // Add blocks content
+      blocks.forEach(block => {
+        const blockElement = document.createElement('div');
+        blockElement.style.marginBottom = '15px';
+        
+        switch (block.type) {
+          case 'heading-1':
+            blockElement.innerHTML = `<h1 style="font-size: 20px; margin: 0; color: #000;">${block.content}</h1>`;
+            break;
+          case 'heading-2':
+            blockElement.innerHTML = `<h2 style="font-size: 18px; margin: 0; color: #000;">${block.content}</h2>`;
+            break;
+          case 'heading-3':
+            blockElement.innerHTML = `<h3 style="font-size: 16px; margin: 0; color: #000;">${block.content}</h3>`;
+            break;
+          case 'bullet-list':
+            blockElement.innerHTML = `<p style="margin: 0; color: #000;">• ${block.content}</p>`;
+            break;
+          case 'numbered-list':
+            blockElement.innerHTML = `<p style="margin: 0; color: #000;">1. ${block.content}</p>`;
+            break;
+          case 'checkbox-list':
+            const checked = block.metadata?.checked ? '☑' : '☐';
+            blockElement.innerHTML = `<p style="margin: 0; color: #000;">${checked} ${block.content}</p>`;
+            break;
+          case 'code':
+            blockElement.innerHTML = `<pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; font-family: monospace; margin: 0; color: #000;">${block.content}</pre>`;
+            break;
+          case 'image':
+            if (block.content) {
+              blockElement.innerHTML = `<img src="${block.content}" style="max-width: 100%; height: auto; margin: 10px 0;" />`;
+            }
+            break;
+          default:
+            blockElement.innerHTML = `<p style="margin: 0; color: #000;">${block.content}</p>`;
+        }
+        
+        tempDiv.appendChild(blockElement);
+      });
+      
+      document.body.appendChild(tempDiv);
+      
+      // Generate canvas from the content
+      const canvas = await html2canvas(tempDiv, {
+        backgroundColor: 'white',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      });
+      
+      // Remove temporary element
+      document.body.removeChild(tempDiv);
+      
+      // Create PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = 0;
+      
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      
+      // Download the PDF
+      pdf.save(`${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
+      
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      alert('Failed to generate PDF. Please try again.');
+    }
   };
 
   // Function to add a paragraph block after media upload
@@ -322,6 +426,15 @@ export default function Editor({ noteId }: EditorProps) {
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
               <span>Auto-saved</span>
             </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={downloadAsPDF}
+              disabled={!title || blocks.length === 0}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download PDF
+            </Button>
             <Button variant="ghost" size="sm">
               <MoreHorizontal className="w-4 h-4" />
             </Button>
