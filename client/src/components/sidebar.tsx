@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Plus, Search, StickyNote } from "lucide-react";
+import { Plus, Search, StickyNote, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -65,6 +65,27 @@ export default function Sidebar({ selectedNoteId, onNoteSelect }: SidebarProps) 
     },
   });
 
+  const deleteNoteMutation = useMutation({
+    mutationFn: async (noteId: number) => {
+      const response = await apiRequest("DELETE", `/api/notes/${noteId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
+      toast({
+        title: "Note deleted",
+        description: "Note has been deleted successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete note.",
+        variant: "destructive",
+      });
+    },
+  });
+
   return (
     <div className="w-80 bg-muted border-r border-border flex flex-col">
       {/* Header */}
@@ -115,9 +136,22 @@ export default function Sidebar({ selectedNoteId, onNoteSelect }: SidebarProps) 
                   <h3 className="font-medium text-secondary-foreground truncate">
                     {note.title}
                   </h3>
-                  <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">
-                    {formatTimeAgo(note.updatedAt)}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {formatTimeAgo(note.updatedAt)}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteNoteMutation.mutate(note.id);
+                      }}
+                      className="h-6 w-6 p-0 hover:text-destructive"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </div>
                 <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
                   {getBlockPreview(note.blocks as any[])}
