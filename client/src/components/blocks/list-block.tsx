@@ -18,11 +18,11 @@ export default function ListBlock({ block, onUpdate, onKeyDown }: ListBlockProps
           <GripVertical className="w-3 h-3" />
         </button>
       </div>
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-3">
         {isNumbered ? (
-          <span className="text-muted-foreground mt-2 text-sm">1.</span>
+          <span className="text-muted-foreground mt-2 text-sm min-w-[20px]">1.</span>
         ) : (
-          <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full mt-3 flex-shrink-0" />
+          <span className="w-2 h-2 bg-muted-foreground rounded-full mt-3 flex-shrink-0" />
         )}
         <Input
           data-block-id={block.id}
@@ -32,7 +32,7 @@ export default function ListBlock({ block, onUpdate, onKeyDown }: ListBlockProps
           }}
           onKeyDown={(e) => onKeyDown(e.nativeEvent, block.id)}
           placeholder="List item..."
-          className="border-none shadow-none p-0 h-auto focus-visible:ring-0"
+          className="border-none shadow-none p-0 h-auto focus-visible:ring-0 flex-1"
         />
       </div>
     </div>

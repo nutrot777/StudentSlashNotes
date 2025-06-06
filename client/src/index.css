@@ -85,6 +85,18 @@
   .drag-handle {
     @apply opacity-0 group-hover:opacity-100 transition-opacity duration-200;
   }
+
+  /* Hide scrollbars for input elements */
+  textarea::-webkit-scrollbar,
+  input::-webkit-scrollbar {
+    display: none;
+  }
+  
+  textarea,
+  input {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Custom scrollbar */

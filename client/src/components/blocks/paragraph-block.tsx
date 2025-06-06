@@ -24,8 +24,9 @@ export default function ParagraphBlock({ block, onUpdate, onKeyDown }: Paragraph
         }}
         onKeyDown={(e) => onKeyDown(e.nativeEvent, block.id)}
         placeholder="Type something..."
-        className="min-h-[40px] resize-none border-none shadow-none p-0 focus-visible:ring-0 text-base leading-relaxed"
-        rows={1}
+        className="min-h-[40px] resize-none border-none shadow-none p-0 focus-visible:ring-0 text-base leading-relaxed overflow-hidden"
+        rows={Math.max(1, Math.ceil(block.content.length / 80))}
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       />
     </div>
   );

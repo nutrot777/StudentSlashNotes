@@ -57,7 +57,17 @@ export default function Editor({ noteId }: EditorProps) {
         setBlocks([]);
       }
     }
-  }, [note, noteId, currentNoteId]);
+  }, [noteId, currentNoteId]);
+
+  // Separate effect to load note data when it becomes available
+  useEffect(() => {
+    if (note && noteId === currentNoteId && currentNoteId !== null) {
+      if (title === "" && blocks.length === 0) {
+        setTitle(note.title || "");
+        setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
+      }
+    }
+  }, [note]);
 
   // Auto-save functionality - only save if there's meaningful content
   useAutoSave(() => {
@@ -124,6 +134,8 @@ export default function Editor({ noteId }: EditorProps) {
   };
 
   const handleKeyDown = (e: KeyboardEvent, blockId: string) => {
+    const currentBlock = blocks.find(b => b.id === blockId);
+    
     if (e.key === '/' && !showSlashMenu) {
       e.preventDefault();
       const target = e.target as HTMLElement;
@@ -132,8 +144,32 @@ export default function Editor({ noteId }: EditorProps) {
       setActiveBlockId(blockId);
       setShowSlashMenu(true);
     } else if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      insertBlock('paragraph', blockId);
+      // Different behavior for different block types
+      if (currentBlock?.type === 'bullet-list' || currentBlock?.type === 'numbered-list') {
+        if (currentBlock.content.trim() === '') {
+          // Exit list mode - convert to paragraph
+          e.preventDefault();
+          convertBlock(blockId, 'paragraph');
+        } else {
+          // Create new list item
+          e.preventDefault();
+          insertBlock(currentBlock.type, blockId);
+        }
+      } else if (currentBlock?.type === 'checkbox-list') {
+        if (currentBlock.content.trim() === '') {
+          // Exit checkbox mode - convert to paragraph
+          e.preventDefault();
+          convertBlock(blockId, 'paragraph');
+        } else {
+          // Create new checkbox item
+          e.preventDefault();
+          insertBlock('checkbox-list', blockId);
+        }
+      } else {
+        // For paragraphs and headings, create new paragraph
+        e.preventDefault();
+        insertBlock('paragraph', blockId);
+      }
     } else if (e.key === 'Backspace') {
       const block = blocks.find(b => b.id === blockId);
       if (block && block.content === '') {
