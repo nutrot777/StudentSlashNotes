@@ -45,60 +45,31 @@ export default function Editor({ noteId }: EditorProps) {
     },
   });
 
-  // Track if we're currently loading a note to prevent overwrites
-  const [isLoadingNote, setIsLoadingNote] = useState(false);
-
-  // Load note data when note ID changes
+  // Simple note loading when noteId changes
   useEffect(() => {
     if (noteId !== currentNoteId) {
-      // Save current note before switching (if there's content to save)
-      if (currentNoteId && note && !updateNoteMutation.isPending) {
-        const hasContentChanged = title !== note?.title || JSON.stringify(blocks) !== JSON.stringify(note?.blocks);
-        const hasContent = title.trim() !== "" || blocks.some(b => b.content.trim() !== "");
-        
-        if (hasContentChanged && hasContent) {
-          // Use a synchronous save before switching
-          updateNoteMutation.mutate(
-            { title, blocks },
-            {
-              onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
-              }
-            }
-          );
-        }
-      }
-      
       setCurrentNoteId(noteId);
-      setIsLoadingNote(true);
+      
       if (noteId === null) {
         setTitle("");
         setBlocks([]);
-        setIsLoadingNote(false);
+      } else if (note) {
+        setTitle(note.title || "");
+        setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
       }
     }
-  }, [noteId, currentNoteId]);
+  }, [noteId, currentNoteId, note]);
 
-  // Load note content when note data becomes available
-  useEffect(() => {
-    if (note && noteId && noteId === currentNoteId && isLoadingNote) {
-      setTitle(note.title || "");
-      setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
-      setIsLoadingNote(false);
-    }
-  }, [note, noteId, currentNoteId, isLoadingNote]);
-
-  // Auto-save functionality - only save when not loading and content has changed
+  // Auto-save with debouncing
   useAutoSave(() => {
-    if (noteId && note && !updateNoteMutation.isPending && !isLoadingNote) {
-      const hasContentChanged = title !== note?.title || JSON.stringify(blocks) !== JSON.stringify(note?.blocks);
+    if (noteId && !updateNoteMutation.isPending) {
       const hasContent = title.trim() !== "" || blocks.some(b => b.content.trim() !== "");
       
-      if (hasContentChanged && hasContent) {
+      if (hasContent) {
         updateNoteMutation.mutate({ title, blocks });
       }
     }
-  }, [title, blocks, noteId, isLoadingNote], 2000);
+  }, [title, blocks, noteId], 1500);
 
   const updateBlock = (blockId: string, updates: Partial<Block>) => {
     setBlocks(prev => prev.map(block => 
