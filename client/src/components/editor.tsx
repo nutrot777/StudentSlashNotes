@@ -286,12 +286,12 @@ export default function Editor({ noteId }: EditorProps) {
           onSelect={(type) => {
             if (activeBlockId) {
               const currentBlock = blocks.find(b => b.id === activeBlockId);
-              if (currentBlock && currentBlock.content === "") {
+              if (currentBlock && currentBlock.content.trim() === "") {
                 // Convert empty block to selected type
                 convertBlock(activeBlockId, type);
               } else {
-                // Insert new block after current block
-                insertBlock(type, activeBlockId);
+                // For non-empty blocks, convert the current block instead of inserting
+                convertBlock(activeBlockId, type);
               }
             }
           }}
