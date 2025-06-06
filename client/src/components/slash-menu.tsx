@@ -80,6 +80,32 @@ const menuItems = [
       },
     ],
   },
+  {
+    category: "Media",
+    items: [
+      {
+        type: "image" as const,
+        icon: "🖼️",
+        title: "Image",
+        description: "Upload an image file",
+        shortcut: "⌘⌥I",
+      },
+      {
+        type: "video" as const,
+        icon: "🎥",
+        title: "Video",
+        description: "Upload a video file",
+        shortcut: "⌘⌥V",
+      },
+      {
+        type: "audio" as const,
+        icon: "🎵",
+        title: "Audio",
+        description: "Upload an audio file",
+        shortcut: "⌘⌥A",
+      },
+    ],
+  },
 ];
 
 export default function SlashMenu({ position, onSelect, onClose }: SlashMenuProps) {

@@ -14,6 +14,8 @@ import ParagraphBlock from "./blocks/paragraph-block";
 import ListBlock from "./blocks/list-block";
 import CodeBlock from "./blocks/code-block";
 import CheckboxBlock from "./blocks/checkbox-block";
+import ImageBlock from "./blocks/image-block";
+import MediaBlock from "./blocks/media-block";
 
 interface EditorProps {
   noteId: number | null;
@@ -219,6 +221,11 @@ export default function Editor({ noteId }: EditorProps) {
         return <CheckboxBlock key={block.id} {...commonProps} />;
       case 'code':
         return <CodeBlock key={block.id} {...commonProps} />;
+      case 'image':
+        return <ImageBlock key={block.id} {...commonProps} />;
+      case 'video':
+      case 'audio':
+        return <MediaBlock key={block.id} {...commonProps} />;
       default:
         return <ParagraphBlock key={block.id} {...commonProps} />;
     }

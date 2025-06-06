@@ -30,7 +30,10 @@ export const blockSchema = z.object({
     'bullet-list',
     'numbered-list',
     'checkbox-list',
-    'code'
+    'code',
+    'image',
+    'video',
+    'audio'
   ]),
   content: z.string(),
   metadata: z.record(z.any()).optional(),
