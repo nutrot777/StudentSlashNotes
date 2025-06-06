@@ -1,4 +1,6 @@
 import { notes, type Note, type InsertNote, type UpdateNote } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, ilike, or } from "drizzle-orm";
 
 export interface IStorage {
   getNotes(): Promise<Note[]>;
@@ -9,99 +11,54 @@ export interface IStorage {
   searchNotes(query: string): Promise<Note[]>;
 }
 
-export class MemStorage implements IStorage {
-  private notes: Map<number, Note>;
-  private currentId: number;
-
-  constructor() {
-    this.notes = new Map();
-    this.currentId = 1;
-    
-    // Create a sample note for demo
-    const sampleNote: Note = {
-      id: 1,
-      title: "Welcome to StudyNotes",
-      blocks: [
-        {
-          id: "block-1",
-          type: "heading-1",
-          content: "Getting Started"
-        },
-        {
-          id: "block-2", 
-          type: "paragraph",
-          content: "Welcome to your new note-taking app! Type / to see available commands."
-        }
-      ],
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    this.notes.set(1, sampleNote);
-    this.currentId = 2;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getNotes(): Promise<Note[]> {
-    return Array.from(this.notes.values()).sort((a, b) => 
-      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    );
+    const result = await db.select().from(notes).orderBy(desc(notes.updatedAt));
+    return result;
   }
 
   async getNote(id: number): Promise<Note | undefined> {
-    return this.notes.get(id);
+    const [note] = await db.select().from(notes).where(eq(notes.id, id));
+    return note || undefined;
   }
 
   async createNote(insertNote: InsertNote): Promise<Note> {
-    const now = new Date();
-    const note: Note = {
-      ...insertNote,
-      id: this.currentId++,
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.notes.set(note.id, note);
+    const [note] = await db
+      .insert(notes)
+      .values({
+        ...insertNote,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .returning();
     return note;
   }
 
   async updateNote(id: number, updates: UpdateNote): Promise<Note | undefined> {
-    const existingNote = this.notes.get(id);
-    if (!existingNote) {
-      return undefined;
-    }
-
-    const updatedNote: Note = {
-      ...existingNote,
-      ...updates,
-      updatedAt: new Date(),
-    };
-    
-    this.notes.set(id, updatedNote);
-    return updatedNote;
+    const [note] = await db
+      .update(notes)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(eq(notes.id, id))
+      .returning();
+    return note || undefined;
   }
 
   async deleteNote(id: number): Promise<boolean> {
-    return this.notes.delete(id);
+    const result = await db.delete(notes).where(eq(notes.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
   }
 
   async searchNotes(query: string): Promise<Note[]> {
-    const allNotes = await this.getNotes();
-    const lowercaseQuery = query.toLowerCase();
-    
-    return allNotes.filter(note => {
-      // Search in title
-      if (note.title.toLowerCase().includes(lowercaseQuery)) {
-        return true;
-      }
-      
-      // Search in block content
-      if (Array.isArray(note.blocks)) {
-        return note.blocks.some((block: any) => 
-          block.content && block.content.toLowerCase().includes(lowercaseQuery)
-        );
-      }
-      
-      return false;
-    });
+    const result = await db
+      .select()
+      .from(notes)
+      .where(ilike(notes.title, `%${query}%`))
+      .orderBy(desc(notes.updatedAt));
+    return result;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
