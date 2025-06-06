@@ -47,7 +47,7 @@ export default function Editor({ noteId }: EditorProps) {
   // Load note data when note changes
   useEffect(() => {
     if (note) {
-      setTitle(note.title);
+      setTitle(note.title || "");
       setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
     } else if (noteId === null) {
       setTitle("");
@@ -101,14 +101,12 @@ export default function Editor({ noteId }: EditorProps) {
 
   const handleKeyDown = (e: KeyboardEvent, blockId: string) => {
     if (e.key === '/') {
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const rect = range.getBoundingClientRect();
-        setSlashMenuPosition({ x: rect.left, y: rect.bottom + 10 });
-        setActiveBlockId(blockId);
-        setShowSlashMenu(true);
-      }
+      e.preventDefault();
+      const target = e.target as HTMLElement;
+      const rect = target.getBoundingClientRect();
+      setSlashMenuPosition({ x: rect.left, y: rect.bottom + 10 });
+      setActiveBlockId(blockId);
+      setShowSlashMenu(true);
     } else if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       insertBlock('paragraph', blockId);
@@ -186,7 +184,7 @@ export default function Editor({ noteId }: EditorProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Input
-              value={title}
+              value={title || ""}
               onChange={(e) => setTitle(e.target.value)}
               className="text-2xl font-semibold bg-transparent border-none shadow-none p-0 h-auto focus-visible:ring-0"
               placeholder="Untitled"
