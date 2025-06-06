@@ -1,0 +1,35 @@
+Warning: A props object containing a &quot;key&quot; prop is being spread into JSX:
+  let props = {key: someKey, data-replit-metadata: ..., data-component-name: ..., block: ..., onUpdate: ..., onKeyDown: ...};
+  &lt;ParagraphBlock {...props} /&gt;
+React keys must be passed directly to JSX without using spread:
+  let props = {data-replit-metadata: ..., data-component-name: ..., block: ..., onUpdate: ..., onKeyDown: ...};
+  &lt;ParagraphBlock key={someKey} {...props} /&gt;
+    at Editor (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/src/components/editor.tsx:33:34)
+    at div
+    at EditorPage (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/src/pages/editor.tsx:24:18)
+    at Route (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=7e57a8bd:323:16)
+    at Switch (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=7e57a8bd:379:17)
+    at Router
+    at Provider (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-VZULKLNG.js?v=7e57a8bd:29:15)
+    at TooltipProvider (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=7e57a8bd:2217:5)
+    at QueryClientProvider (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=7e57a8bd:2805:3)
+    at App
+let props = {key: someKey, data-replit-metadata: ..., data-component-name: ..., block: ..., onUpdate: ..., onKeyDown: ...};
+&amp;lt;ParagraphBlock {...props} /&amp;gt;
+React keys must be passed directly to JSX without using spread:
+let props = {data-replit-metadata: ..., data-component-name: ..., block: ..., onUpdate: ..., onKeyDown: ...};
+&amp;lt;ParagraphBlock key={someKey} {...props} /&amp;gt;
+at Editor (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/src/components/editor.tsx:33:34)
+at div
+at EditorPage (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/src/pages/editor.tsx:24:18)
+at Route (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=7e57a8bd:323:16)
+at Switch (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=7e57a8bd:379:17)
+at Router
+at Provider (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-VZULKLNG.js?v=7e57a8bd:29:15)
+at TooltipProvider (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=7e57a8bd:2217:5)
+at QueryClientProvider (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=7e57a8bd:2805:3)
+at App
+at t.value (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://2535abc8-1efb-4889-98f7-377683cab452-00-36ofy36wpvjk0.janeway.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400

@@ -55,12 +55,17 @@ export default function Editor({ noteId }: EditorProps) {
     }
   }, [note, noteId]);
 
-  // Auto-save functionality
+  // Auto-save functionality - only save if there's meaningful content
   useAutoSave(() => {
-    if (noteId && (title !== note?.title || JSON.stringify(blocks) !== JSON.stringify(note?.blocks))) {
-      updateNoteMutation.mutate({ title, blocks });
+    if (noteId && note) {
+      const hasContentChanged = title !== note?.title || JSON.stringify(blocks) !== JSON.stringify(note?.blocks);
+      const hasContent = title.trim() !== "" || blocks.length > 0;
+      
+      if (hasContentChanged && hasContent) {
+        updateNoteMutation.mutate({ title, blocks });
+      }
     }
-  }, [title, blocks, noteId, note], 1000);
+  }, [title, blocks, noteId, note?.title, note?.blocks], 2000);
 
   const updateBlock = (blockId: string, updates: Partial<Block>) => {
     setBlocks(prev => prev.map(block => 
@@ -135,7 +140,6 @@ export default function Editor({ noteId }: EditorProps) {
 
   const renderBlock = (block: Block) => {
     const commonProps = {
-      key: block.id,
       block,
       onUpdate: updateBlock,
       onKeyDown: handleKeyDown,
@@ -145,16 +149,16 @@ export default function Editor({ noteId }: EditorProps) {
       case 'heading-1':
       case 'heading-2':
       case 'heading-3':
-        return <HeadingBlock {...commonProps} />;
+        return <HeadingBlock key={block.id} {...commonProps} />;
       case 'bullet-list':
       case 'numbered-list':
-        return <ListBlock {...commonProps} />;
+        return <ListBlock key={block.id} {...commonProps} />;
       case 'checkbox-list':
-        return <CheckboxBlock {...commonProps} />;
+        return <CheckboxBlock key={block.id} {...commonProps} />;
       case 'code':
-        return <CodeBlock {...commonProps} />;
+        return <CodeBlock key={block.id} {...commonProps} />;
       default:
-        return <ParagraphBlock {...commonProps} />;
+        return <ParagraphBlock key={block.id} {...commonProps} />;
     }
   };
 
@@ -208,8 +212,10 @@ export default function Editor({ noteId }: EditorProps) {
           <div className="space-y-4">
             {blocks.length === 0 ? (
               <div 
-                className="text-muted-foreground cursor-text min-h-[24px]"
-                onClick={() => insertBlock('paragraph')}
+                className="text-muted-foreground cursor-text min-h-[24px] p-2"
+                onClick={() => {
+                  insertBlock('paragraph');
+                }}
               >
                 <span>Type </span>
                 <span className="bg-muted px-1 rounded text-sm font-mono">/</span>
