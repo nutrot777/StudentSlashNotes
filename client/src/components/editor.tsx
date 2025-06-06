@@ -51,6 +51,24 @@ export default function Editor({ noteId }: EditorProps) {
   // Load note data when note ID changes
   useEffect(() => {
     if (noteId !== currentNoteId) {
+      // Save current note before switching (if there's content to save)
+      if (currentNoteId && note && !updateNoteMutation.isPending) {
+        const hasContentChanged = title !== note?.title || JSON.stringify(blocks) !== JSON.stringify(note?.blocks);
+        const hasContent = title.trim() !== "" || blocks.some(b => b.content.trim() !== "");
+        
+        if (hasContentChanged && hasContent) {
+          // Use a synchronous save before switching
+          updateNoteMutation.mutate(
+            { title, blocks },
+            {
+              onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
+              }
+            }
+          );
+        }
+      }
+      
       setCurrentNoteId(noteId);
       setIsLoadingNote(true);
       if (noteId === null) {
