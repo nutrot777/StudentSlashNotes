@@ -45,7 +45,7 @@ export default function Editor({ noteId }: EditorProps) {
     },
   });
 
-  // Simple note loading when noteId changes
+  // Load note content when noteId changes
   useEffect(() => {
     if (noteId !== currentNoteId) {
       setCurrentNoteId(noteId);
@@ -53,12 +53,17 @@ export default function Editor({ noteId }: EditorProps) {
       if (noteId === null) {
         setTitle("");
         setBlocks([]);
-      } else if (note) {
-        setTitle(note.title || "");
-        setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
       }
     }
-  }, [noteId, currentNoteId, note]);
+  }, [noteId, currentNoteId]);
+
+  // Load note data when it becomes available
+  useEffect(() => {
+    if (note && noteId === currentNoteId) {
+      setTitle(note.title || "");
+      setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
+    }
+  }, [note, noteId, currentNoteId]);
 
   // Auto-save with debouncing
   useAutoSave(() => {
