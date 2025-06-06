@@ -45,35 +45,34 @@ export default function Editor({ noteId }: EditorProps) {
     },
   });
 
-  // Load note data when note ID changes or note data is fetched
+  // Track if we're currently loading a note to prevent overwrites
+  const [isLoadingNote, setIsLoadingNote] = useState(false);
+
+  // Load note data when note ID changes
   useEffect(() => {
     if (noteId !== currentNoteId) {
-      // Switching to a different note
       setCurrentNoteId(noteId);
+      setIsLoadingNote(true);
       if (noteId === null) {
         setTitle("");
         setBlocks([]);
+        setIsLoadingNote(false);
       }
     }
   }, [noteId, currentNoteId]);
 
   // Load note content when note data becomes available
   useEffect(() => {
-    if (note && noteId && noteId === currentNoteId) {
-      // Only update if we don't already have content loaded for this note
-      const currentContent = JSON.stringify({ title, blocks });
-      const noteContent = JSON.stringify({ title: note.title || "", blocks: Array.isArray(note.blocks) ? note.blocks : [] });
-      
-      if (currentContent !== noteContent) {
-        setTitle(note.title || "");
-        setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
-      }
+    if (note && noteId && noteId === currentNoteId && isLoadingNote) {
+      setTitle(note.title || "");
+      setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
+      setIsLoadingNote(false);
     }
-  }, [note, noteId, currentNoteId]);
+  }, [note, noteId, currentNoteId, isLoadingNote]);
 
-  // Auto-save functionality with better conflict prevention
+  // Auto-save functionality - only save when not loading and content has changed
   useAutoSave(() => {
-    if (noteId && note && !updateNoteMutation.isPending) {
+    if (noteId && note && !updateNoteMutation.isPending && !isLoadingNote) {
       const hasContentChanged = title !== note?.title || JSON.stringify(blocks) !== JSON.stringify(note?.blocks);
       const hasContent = title.trim() !== "" || blocks.some(b => b.content.trim() !== "");
       
@@ -81,7 +80,7 @@ export default function Editor({ noteId }: EditorProps) {
         updateNoteMutation.mutate({ title, blocks });
       }
     }
-  }, [title, blocks, noteId], 3000);
+  }, [title, blocks, noteId, isLoadingNote], 2000);
 
   const updateBlock = (blockId: string, updates: Partial<Block>) => {
     setBlocks(prev => prev.map(block => 
