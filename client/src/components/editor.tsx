@@ -60,22 +60,28 @@ export default function Editor({ noteId }: EditorProps) {
   // Load note content when note data becomes available
   useEffect(() => {
     if (note && noteId && noteId === currentNoteId) {
-      setTitle(note.title || "");
-      setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
+      // Only update if we don't already have content loaded for this note
+      const currentContent = JSON.stringify({ title, blocks });
+      const noteContent = JSON.stringify({ title: note.title || "", blocks: Array.isArray(note.blocks) ? note.blocks : [] });
+      
+      if (currentContent !== noteContent) {
+        setTitle(note.title || "");
+        setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
+      }
     }
   }, [note, noteId, currentNoteId]);
 
-  // Auto-save functionality - only save if there's meaningful content
+  // Auto-save functionality with better conflict prevention
   useAutoSave(() => {
-    if (noteId && note) {
+    if (noteId && note && !updateNoteMutation.isPending) {
       const hasContentChanged = title !== note?.title || JSON.stringify(blocks) !== JSON.stringify(note?.blocks);
-      const hasContent = title.trim() !== "" || blocks.length > 0;
+      const hasContent = title.trim() !== "" || blocks.some(b => b.content.trim() !== "");
       
       if (hasContentChanged && hasContent) {
         updateNoteMutation.mutate({ title, blocks });
       }
     }
-  }, [title, blocks, noteId, note?.title, note?.blocks], 2000);
+  }, [title, blocks, noteId], 3000);
 
   const updateBlock = (blockId: string, updates: Partial<Block>) => {
     setBlocks(prev => prev.map(block => 
@@ -133,12 +139,18 @@ export default function Editor({ noteId }: EditorProps) {
     const currentBlock = blocks.find(b => b.id === blockId);
     
     if (e.key === '/' && !showSlashMenu) {
-      e.preventDefault();
-      const target = e.target as HTMLElement;
-      const rect = target.getBoundingClientRect();
-      setSlashMenuPosition({ x: rect.left, y: rect.bottom + 10 });
-      setActiveBlockId(blockId);
-      setShowSlashMenu(true);
+      // Check if the cursor is at the beginning of the line or after a space
+      const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+      const cursorPosition = target.selectionStart || 0;
+      const textBeforeCursor = target.value.substring(0, cursorPosition);
+      
+      if (textBeforeCursor === '' || textBeforeCursor.endsWith(' ')) {
+        e.preventDefault();
+        const rect = target.getBoundingClientRect();
+        setSlashMenuPosition({ x: rect.left, y: rect.bottom + 10 });
+        setActiveBlockId(blockId);
+        setShowSlashMenu(true);
+      }
     } else if (e.key === 'Enter' && !e.shiftKey) {
       // Different behavior for different block types
       if (currentBlock?.type === 'bullet-list' || currentBlock?.type === 'numbered-list') {
