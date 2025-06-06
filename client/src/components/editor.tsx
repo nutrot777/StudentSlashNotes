@@ -25,6 +25,7 @@ export default function Editor({ noteId }: EditorProps) {
   const [showSlashMenu, setShowSlashMenu] = useState(false);
   const [slashMenuPosition, setSlashMenuPosition] = useState({ x: 0, y: 0 });
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
+  const [currentNoteId, setCurrentNoteId] = useState<number | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
 
   const { data: note, isLoading } = useQuery<Note>({
@@ -44,16 +45,19 @@ export default function Editor({ noteId }: EditorProps) {
     },
   });
 
-  // Load note data when note changes
+  // Load note data when switching to a different note
   useEffect(() => {
-    if (note) {
-      setTitle(note.title || "");
-      setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
-    } else if (noteId === null) {
-      setTitle("");
-      setBlocks([]);
+    if (noteId !== currentNoteId) {
+      setCurrentNoteId(noteId);
+      if (note && noteId) {
+        setTitle(note.title || "");
+        setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
+      } else if (noteId === null) {
+        setTitle("");
+        setBlocks([]);
+      }
     }
-  }, [note, noteId]);
+  }, [note, noteId, currentNoteId]);
 
   // Auto-save functionality - only save if there's meaningful content
   useAutoSave(() => {
