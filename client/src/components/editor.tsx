@@ -116,6 +116,33 @@ export default function Editor({ noteId }: EditorProps) {
     ));
   };
 
+  // Function to add a paragraph block after media upload
+  const addParagraphAfterBlock = (afterBlockId: string) => {
+    const newBlock: Block = {
+      id: generateId(),
+      type: 'paragraph',
+      content: "",
+      metadata: {}
+    };
+
+    const index = blocks.findIndex(b => b.id === afterBlockId);
+    if (index !== -1) {
+      setBlocks(prev => {
+        const newBlocks = [...prev];
+        newBlocks.splice(index + 1, 0, newBlock);
+        return newBlocks;
+      });
+
+      // Focus the new block
+      setTimeout(() => {
+        const element = document.querySelector(`[data-block-id="${newBlock.id}"]`);
+        if (element) {
+          (element as HTMLElement).focus();
+        }
+      }, 200);
+    }
+  };
+
   const insertBlock = (type: Block['type'], afterBlockId?: string) => {
     const newBlock: Block = {
       id: generateId(),
@@ -248,6 +275,7 @@ export default function Editor({ noteId }: EditorProps) {
       block,
       onUpdate: updateBlock,
       onKeyDown: handleKeyDown,
+      onAddParagraph: addParagraphAfterBlock,
     };
 
     switch (block.type) {

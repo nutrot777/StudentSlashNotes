@@ -7,9 +7,10 @@ interface MediaBlockProps {
   block: Block;
   onUpdate: (blockId: string, updates: Partial<Block>) => void;
   onKeyDown: (e: KeyboardEvent, blockId: string) => void;
+  onAddParagraph?: (afterBlockId: string) => void;
 }
 
-export default function MediaBlock({ block, onUpdate, onKeyDown }: MediaBlockProps) {
+export default function MediaBlock({ block, onUpdate, onKeyDown, onAddParagraph }: MediaBlockProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 

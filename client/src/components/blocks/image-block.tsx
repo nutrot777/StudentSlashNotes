@@ -8,9 +8,10 @@ interface ImageBlockProps {
   block: Block;
   onUpdate: (blockId: string, updates: Partial<Block>) => void;
   onKeyDown: (e: KeyboardEvent, blockId: string) => void;
+  onAddParagraph?: (afterBlockId: string) => void;
 }
 
-export default function ImageBlock({ block, onUpdate, onKeyDown }: ImageBlockProps) {
+export default function ImageBlock({ block, onUpdate, onKeyDown, onAddParagraph }: ImageBlockProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -38,18 +39,11 @@ export default function ImageBlock({ block, onUpdate, onKeyDown }: ImageBlockPro
         setIsUploading(false);
         
         // Auto-add a new paragraph block after the image
-        setTimeout(() => {
-          const newBlock = {
-            id: `block-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            type: 'paragraph' as const,
-            content: '',
-            metadata: {}
-          };
-          
-          // Trigger adding new block by simulating Enter key
-          const event = new KeyboardEvent('keydown', { key: 'Enter' });
-          onKeyDown(event, block.id);
-        }, 100);
+        if (onAddParagraph) {
+          setTimeout(() => {
+            onAddParagraph(block.id);
+          }, 200);
+        }
       };
       reader.readAsDataURL(file);
     } catch (error) {
