@@ -41,6 +41,12 @@ export default function MediaBlock({ block, onUpdate, onKeyDown }: MediaBlockPro
           }
         });
         setIsUploading(false);
+        
+        // Auto-add a new paragraph block after the media
+        setTimeout(() => {
+          const event = new KeyboardEvent('keydown', { key: 'Enter' });
+          onKeyDown(event, block.id);
+        }, 100);
       };
       reader.readAsDataURL(file);
     } catch (error) {
@@ -66,6 +72,11 @@ export default function MediaBlock({ block, onUpdate, onKeyDown }: MediaBlockPro
 
   const removeMedia = () => {
     onUpdate(block.id, { content: "", metadata: {} });
+  };
+
+  const cancelUpload = () => {
+    // Convert to paragraph block if no content
+    onUpdate(block.id, { type: 'paragraph', content: "" });
   };
 
   const formatFileSize = (bytes: number) => {
@@ -153,13 +164,22 @@ export default function MediaBlock({ block, onUpdate, onKeyDown }: MediaBlockPro
                 <p className="text-sm text-muted-foreground mb-2">
                   Drag and drop a {isVideo ? 'video' : 'audio'} file here, or
                 </p>
-                <Button
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Choose {isVideo ? 'Video' : 'Audio'}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Choose {isVideo ? 'Video' : 'Audio'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={cancelUpload}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </div>
               </div>
             </div>
           )}

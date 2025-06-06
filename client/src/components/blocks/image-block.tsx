@@ -36,6 +36,20 @@ export default function ImageBlock({ block, onUpdate, onKeyDown }: ImageBlockPro
           }
         });
         setIsUploading(false);
+        
+        // Auto-add a new paragraph block after the image
+        setTimeout(() => {
+          const newBlock = {
+            id: `block-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            type: 'paragraph' as const,
+            content: '',
+            metadata: {}
+          };
+          
+          // Trigger adding new block by simulating Enter key
+          const event = new KeyboardEvent('keydown', { key: 'Enter' });
+          onKeyDown(event, block.id);
+        }, 100);
       };
       reader.readAsDataURL(file);
     } catch (error) {
@@ -61,6 +75,11 @@ export default function ImageBlock({ block, onUpdate, onKeyDown }: ImageBlockPro
 
   const removeImage = () => {
     onUpdate(block.id, { content: "", metadata: {} });
+  };
+
+  const cancelUpload = () => {
+    // Convert to paragraph block if no content
+    onUpdate(block.id, { type: 'paragraph', content: "" });
   };
 
   return (
@@ -119,13 +138,22 @@ export default function ImageBlock({ block, onUpdate, onKeyDown }: ImageBlockPro
                 <p className="text-sm text-muted-foreground mb-2">
                   Drag and drop an image here, or
                 </p>
-                <Button
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Choose Image
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Choose Image
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={cancelUpload}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </div>
               </div>
             </div>
           )}
