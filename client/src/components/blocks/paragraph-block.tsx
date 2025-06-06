@@ -1,3 +1,4 @@
+import { useRef, useEffect } from "react";
 import { GripVertical } from "lucide-react";
 import type { Block } from "@shared/schema";
 
@@ -8,6 +9,14 @@ interface ParagraphBlockProps {
 }
 
 export default function ParagraphBlock({ block, onUpdate, onKeyDown }: ParagraphBlockProps) {
+  const elementRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (elementRef.current && elementRef.current.textContent !== block.content) {
+      elementRef.current.textContent = block.content;
+    }
+  }, [block.content]);
+
   return (
     <div className="group relative block-hover" data-block-type="paragraph">
       <div className="absolute -left-6 top-1 drag-handle">
@@ -16,6 +25,7 @@ export default function ParagraphBlock({ block, onUpdate, onKeyDown }: Paragraph
         </button>
       </div>
       <p
+        ref={elementRef}
         data-block-id={block.id}
         className="text-base leading-relaxed content-editable outline-none min-h-[24px]"
         contentEditable
@@ -25,10 +35,8 @@ export default function ParagraphBlock({ block, onUpdate, onKeyDown }: Paragraph
           onUpdate(block.id, { content });
         }}
         onKeyDown={(e) => onKeyDown(e.nativeEvent, block.id)}
-        placeholder="Type something..."
-      >
-        {block.content}
-      </p>
+        data-placeholder={block.content === "" ? "Type something..." : ""}
+      />
     </div>
   );
 }

@@ -100,12 +100,27 @@ export default function Editor({ noteId }: EditorProps) {
     }, 50);
   };
 
+  const convertBlock = (blockId: string, newType: Block['type']) => {
+    setBlocks(prev => prev.map(block => 
+      block.id === blockId ? { ...block, type: newType } : block
+    ));
+    setShowSlashMenu(false);
+    
+    // Focus the converted block
+    setTimeout(() => {
+      const element = document.querySelector(`[data-block-id="${blockId}"]`);
+      if (element) {
+        (element as HTMLElement).focus();
+      }
+    }, 50);
+  };
+
   const deleteBlock = (blockId: string) => {
     setBlocks(prev => prev.filter(block => block.id !== blockId));
   };
 
   const handleKeyDown = (e: KeyboardEvent, blockId: string) => {
-    if (e.key === '/') {
+    if (e.key === '/' && !showSlashMenu) {
       e.preventDefault();
       const target = e.target as HTMLElement;
       const rect = target.getBoundingClientRect();
@@ -234,7 +249,14 @@ export default function Editor({ noteId }: EditorProps) {
           position={slashMenuPosition}
           onSelect={(type) => {
             if (activeBlockId) {
-              insertBlock(type, activeBlockId);
+              const currentBlock = blocks.find(b => b.id === activeBlockId);
+              if (currentBlock && currentBlock.content === "") {
+                // Convert empty block to selected type
+                convertBlock(activeBlockId, type);
+              } else {
+                // Insert new block after current block
+                insertBlock(type, activeBlockId);
+              }
             }
           }}
           onClose={() => setShowSlashMenu(false)}

@@ -68,6 +68,12 @@
     @apply ring-0 outline-none;
   }
   
+  .content-editable[data-placeholder]:empty::before {
+    content: attr(data-placeholder);
+    color: hsl(var(--muted-foreground));
+    pointer-events: none;
+  }
+  
   .block-hover {
     @apply transition-all duration-200;
   }

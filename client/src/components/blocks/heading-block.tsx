@@ -1,3 +1,4 @@
+import { useRef, useEffect } from "react";
 import { GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Block } from "@shared/schema";
@@ -9,6 +10,8 @@ interface HeadingBlockProps {
 }
 
 export default function HeadingBlock({ block, onUpdate, onKeyDown }: HeadingBlockProps) {
+  const elementRef = useRef<HTMLHeadingElement>(null);
+
   const getHeadingClass = () => {
     switch (block.type) {
       case 'heading-1':
@@ -22,6 +25,12 @@ export default function HeadingBlock({ block, onUpdate, onKeyDown }: HeadingBloc
     }
   };
 
+  useEffect(() => {
+    if (elementRef.current && elementRef.current.textContent !== block.content) {
+      elementRef.current.textContent = block.content;
+    }
+  }, [block.content]);
+
   return (
     <div className="group relative block-hover" data-block-type={block.type}>
       <div className="absolute -left-6 top-1 drag-handle">
@@ -30,6 +39,7 @@ export default function HeadingBlock({ block, onUpdate, onKeyDown }: HeadingBloc
         </button>
       </div>
       <h1
+        ref={elementRef}
         data-block-id={block.id}
         className={cn(
           getHeadingClass(),
@@ -42,10 +52,8 @@ export default function HeadingBlock({ block, onUpdate, onKeyDown }: HeadingBloc
           onUpdate(block.id, { content });
         }}
         onKeyDown={(e) => onKeyDown(e.nativeEvent, block.id)}
-        placeholder={`Heading ${block.type.split('-')[1]}`}
-      >
-        {block.content}
-      </h1>
+        data-placeholder={block.content === "" ? `Heading ${block.type.split('-')[1]}` : ""}
+      />
     </div>
   );
 }
