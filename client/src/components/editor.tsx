@@ -65,10 +65,8 @@ export default function Editor({ noteId }: EditorProps) {
   // Load note data when it becomes available
   useEffect(() => {
     if (note && noteId === currentNoteId) {
-      console.log("Loading note data:", { noteId, note, blocks: note.blocks });
       setTitle(note.title || "");
       const noteBlocks = Array.isArray(note.blocks) ? note.blocks as Block[] : [];
-      console.log("Setting blocks:", noteBlocks);
       setBlocks(noteBlocks);
     }
   }, [note, noteId, currentNoteId]);

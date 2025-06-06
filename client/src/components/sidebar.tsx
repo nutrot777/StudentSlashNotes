@@ -68,7 +68,8 @@ export default function Sidebar({ selectedNoteId, onNoteSelect }: SidebarProps) 
   const deleteNoteMutation = useMutation({
     mutationFn: async (noteId: number) => {
       const response = await apiRequest("DELETE", `/api/notes/${noteId}`);
-      return response.json();
+      if (!response.ok) throw new Error("Failed to delete note");
+      return true; // Don't try to parse JSON from 204 response
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notes"] });
