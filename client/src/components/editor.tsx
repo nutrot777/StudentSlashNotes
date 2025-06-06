@@ -1,21 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { MoreHorizontal, GripVertical } from "lucide-react";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
+import { MoreHorizontal, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,7 +17,6 @@ import CodeBlock from "./blocks/code-block";
 import CheckboxBlock from "./blocks/checkbox-block";
 import ImageBlock from "./blocks/image-block";
 import MediaBlock from "./blocks/media-block";
-import SortableBlock from "./sortable-block";
 
 interface EditorProps {
   noteId: number | null;
@@ -47,12 +31,24 @@ export default function Editor({ noteId }: EditorProps) {
   const [currentNoteId, setCurrentNoteId] = useState<number | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
 
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
+  // Simple block reordering functions
+  const moveBlockUp = (blockId: string) => {
+    const index = blocks.findIndex(b => b.id === blockId);
+    if (index > 0) {
+      const newBlocks = [...blocks];
+      [newBlocks[index - 1], newBlocks[index]] = [newBlocks[index], newBlocks[index - 1]];
+      setBlocks(newBlocks);
+    }
+  };
+
+  const moveBlockDown = (blockId: string) => {
+    const index = blocks.findIndex(b => b.id === blockId);
+    if (index < blocks.length - 1) {
+      const newBlocks = [...blocks];
+      [newBlocks[index], newBlocks[index + 1]] = [newBlocks[index + 1], newBlocks[index]];
+      setBlocks(newBlocks);
+    }
+  };
 
 
 
@@ -189,18 +185,7 @@ export default function Editor({ noteId }: EditorProps) {
     setBlocks(prev => prev.filter(block => block.id !== blockId));
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
 
-    if (active.id !== over?.id) {
-      setBlocks((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over?.id);
-
-        return arrayMove(items, oldIndex, newIndex);
-      });
-    }
-  };
 
 
 
@@ -360,22 +345,35 @@ export default function Editor({ noteId }: EditorProps) {
                 <span> for commands</span>
               </div>
             ) : (
-              <DndContext
-                sensors={sensors}
-                collisionDetection={closestCenter}
-                onDragEnd={handleDragEnd}
-              >
-                <SortableContext
-                  items={blocks.map(block => block.id)}
-                  strategy={verticalListSortingStrategy}
-                >
-                  {blocks.map(block => (
-                    <SortableBlock key={block.id} block={block}>
-                      {renderBlock(block)}
-                    </SortableBlock>
-                  ))}
-                </SortableContext>
-              </DndContext>
+              blocks.map((block, index) => (
+                <div key={block.id} className="relative group">
+                  <div className="absolute -left-12 top-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {index > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={() => moveBlockUp(block.id)}
+                        title="Move up"
+                      >
+                        <ChevronUp className="w-3 h-3" />
+                      </Button>
+                    )}
+                    {index < blocks.length - 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={() => moveBlockDown(block.id)}
+                        title="Move down"
+                      >
+                        <ChevronDown className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
+                  {renderBlock(block)}
+                </div>
+              ))
             )}
           </div>
         </div>

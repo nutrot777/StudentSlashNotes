@@ -84,13 +84,21 @@ export default function ImageBlock({ block, onUpdate, onKeyDown, onAddParagraph 
         </button>
       </div>
 
-      {block.content ? (
+      {block.content && block.content.length > 0 ? (
         <div className="relative">
           <img 
             src={block.content} 
             alt={block.metadata?.fileName || "Uploaded image"}
             className="max-w-full h-auto rounded-lg border border-border"
             style={{ maxHeight: '400px' }}
+            onError={(e) => {
+              console.error('Image failed to load:', e);
+              // Remove broken image
+              removeImage();
+            }}
+            onLoad={() => {
+              console.log('Image loaded successfully');
+            }}
           />
           <Button
             variant="destructive"

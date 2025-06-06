@@ -44,10 +44,11 @@ export default function MediaBlock({ block, onUpdate, onKeyDown, onAddParagraph 
         setIsUploading(false);
         
         // Auto-add a new paragraph block after the media
-        setTimeout(() => {
-          const event = new KeyboardEvent('keydown', { key: 'Enter' });
-          onKeyDown(event, block.id);
-        }, 100);
+        if (onAddParagraph) {
+          setTimeout(() => {
+            onAddParagraph(block.id);
+          }, 200);
+        }
       };
       reader.readAsDataURL(file);
     } catch (error) {
