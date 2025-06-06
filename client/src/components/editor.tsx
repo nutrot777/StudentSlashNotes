@@ -45,29 +45,25 @@ export default function Editor({ noteId }: EditorProps) {
     },
   });
 
-  // Load note data when switching to a different note
+  // Load note data when note ID changes or note data is fetched
   useEffect(() => {
     if (noteId !== currentNoteId) {
+      // Switching to a different note
       setCurrentNoteId(noteId);
-      if (note && noteId) {
-        setTitle(note.title || "");
-        setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
-      } else if (noteId === null) {
+      if (noteId === null) {
         setTitle("");
         setBlocks([]);
       }
     }
   }, [noteId, currentNoteId]);
 
-  // Separate effect to load note data when it becomes available
+  // Load note content when note data becomes available
   useEffect(() => {
-    if (note && noteId === currentNoteId && currentNoteId !== null) {
-      if (title === "" && blocks.length === 0) {
-        setTitle(note.title || "");
-        setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
-      }
+    if (note && noteId && noteId === currentNoteId) {
+      setTitle(note.title || "");
+      setBlocks(Array.isArray(note.blocks) ? note.blocks as Block[] : []);
     }
-  }, [note]);
+  }, [note, noteId, currentNoteId]);
 
   // Auto-save functionality - only save if there's meaningful content
   useAutoSave(() => {
@@ -207,7 +203,7 @@ export default function Editor({ noteId }: EditorProps) {
         return <HeadingBlock key={block.id} {...commonProps} />;
       case 'bullet-list':
       case 'numbered-list':
-        return <ListBlock key={block.id} {...commonProps} />;
+        return <ListBlock key={block.id} {...commonProps} blocks={blocks} />;
       case 'checkbox-list':
         return <CheckboxBlock key={block.id} {...commonProps} />;
       case 'code':

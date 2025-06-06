@@ -21,12 +21,20 @@ export default function ParagraphBlock({ block, onUpdate, onKeyDown }: Paragraph
         value={block.content}
         onChange={(e) => {
           onUpdate(block.id, { content: e.target.value });
+          // Auto-resize textarea
+          e.target.style.height = 'auto';
+          e.target.style.height = e.target.scrollHeight + 'px';
         }}
         onKeyDown={(e) => onKeyDown(e.nativeEvent, block.id)}
         placeholder="Type something..."
         className="min-h-[40px] resize-none border-none shadow-none p-0 focus-visible:ring-0 text-base leading-relaxed overflow-hidden"
-        rows={Math.max(1, Math.ceil(block.content.length / 80))}
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        rows={1}
+        style={{ 
+          scrollbarWidth: 'none', 
+          msOverflowStyle: 'none',
+          height: 'auto',
+          minHeight: '40px'
+        }}
       />
     </div>
   );

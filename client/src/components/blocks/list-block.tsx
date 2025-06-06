@@ -6,9 +6,27 @@ interface ListBlockProps {
   block: Block;
   onUpdate: (blockId: string, updates: Partial<Block>) => void;
   onKeyDown: (e: KeyboardEvent, blockId: string) => void;
+  blocks?: Block[];
 }
 
-export default function ListBlock({ block, onUpdate, onKeyDown }: ListBlockProps) {
+export default function ListBlock({ block, onUpdate, onKeyDown, blocks = [] }: ListBlockProps) {
+  // Calculate list number by counting previous numbered list items
+  const getListNumber = () => {
+    const currentIndex = blocks.findIndex(b => b.id === block.id);
+    let listNumber = 1;
+    
+    for (let i = 0; i < currentIndex; i++) {
+      if (blocks[i].type === 'numbered-list') {
+        listNumber++;
+      } else if (blocks[i].type !== 'numbered-list') {
+        // Reset numbering if there's a non-list block
+        listNumber = 1;
+      }
+    }
+    
+    return listNumber;
+  };
+
   const isNumbered = block.type === 'numbered-list';
 
   return (
@@ -20,7 +38,7 @@ export default function ListBlock({ block, onUpdate, onKeyDown }: ListBlockProps
       </div>
       <div className="flex items-start gap-3">
         {isNumbered ? (
-          <span className="text-muted-foreground mt-2 text-sm min-w-[20px]">1.</span>
+          <span className="text-muted-foreground mt-2 text-sm min-w-[20px]">{getListNumber()}.</span>
         ) : (
           <span className="w-2 h-2 bg-muted-foreground rounded-full mt-3 flex-shrink-0" />
         )}
